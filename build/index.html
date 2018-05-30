@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Twitter Contribution Chart</title>
+
+  <link href="/entireframework.min.css" rel="stylesheet" type="text/css">
+
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .hero {
+      padding: 50px;
+      border-radius: 10px;
+      margin-top: 1em;
+      align-items: center;
+      max-width: 800px;
+    }
+
+    .hero h1 {
+      margin-top: 0;
+      margin-bottom: 0.3em;
+    }
+
+    .twitter-color {
+      background: #5093D4;
+    }
+
+    .hero .btn {
+      font-size: 1em
+    }
+
+    footer {
+      align-self: flex-end
+    }
+
+    a {
+      color: gray
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="hero">
+      <h1>
+        <!--<s>GitHub</s>-->Twitter Contribution Chart Generator</h1>
+      <p>Inspired by
+        <a href="https://github-contributions.now.sh/">https://github-contributions.now.sh</a>
+      </p>
+
+      <p>1. Request Twitter Timeline https://twitter.com/settings/account "Request your archive"</p>
+      <p>2. You should receieve .zip file</p>
+      <p>3. Download, extract and upload</p>
+      <div id="UploadComponent" class="btn twitter-color">Upload tweets.csv</div>
+      <p>We don't store anything, all data is processed at this page</p>
+    </div>
+  </div>
+
+  <script src="/Index.js"></script>
+</body>
+
+</html>
