@@ -1,0 +1,35 @@
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero {
+  padding: 50px;
+  border-radius: 10px;
+  margin-top: 1em;
+  align-items: center;
+  max-width: 800px;
+}
+
+.hero h1 {
+  margin-top: 0;
+  margin-bottom: 0.3em;
+  font-size: 1.8em;
+}
+
+.twitter-color {
+  background: #5093d4;
+}
+
+.hero .btn {
+  font-size: 1em;
+}
+
+footer {
+  align-self: flex-end;
+}
+
+a {
+  color: gray;
+}

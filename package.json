@@ -1,32 +1,20 @@
 {
-  "name": "twitter-contribution-chart",
+  "name": "tcc",
   "version": "0.1.0",
-  "scripts": {
-    "build": "bsb -make-world",
-    "start": "bsb -make-world -w",
-    "clean": "bsb -clean-world",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "webpack": "webpack -w",
-    "http": "cd build && python -m SimpleHTTPServer",
-    "dev": "run-p start webpack http",
-    "webpack:production": "NODE_ENV=production webpack"
-  },
-  "keywords": [
-    "BuckleScript"
-  ],
-  "author": "",
-  "license": "MIT",
+  "private": true,
   "dependencies": {
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0",
-    "react-file-reader-input": "^2.0.0",
-    "reason-react": ">=0.3.4"
+    "line-navigator": "^2.1.6",
+    "papaparse": "^4.4.0",
+    "react": "^16.4.0",
+    "react-dom": "^16.4.0",
+    "react-dropzone": "^4.2.11",
+    "react-progress-bar-plus": "^1.3.1",
+    "react-scripts": "1.1.4"
   },
-  "devDependencies": {
-    "bs-platform": "^3.1.5",
-    "copy-webpack-plugin": "^4.5.1",
-    "npm-run-all": "^4.1.3",
-    "webpack": "^4.0.1",
-    "webpack-cli": "^2.0.10"
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
   }
 }
