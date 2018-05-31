@@ -11,12 +11,15 @@
     "dev": "run-p start webpack http",
     "webpack:production": "NODE_ENV=production webpack"
   },
-  "keywords": ["BuckleScript"],
+  "keywords": [
+    "BuckleScript"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
+    "react-file-reader-input": "^2.0.0",
     "reason-react": ">=0.3.4"
   },
   "devDependencies": {
