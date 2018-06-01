@@ -2,22 +2,43 @@ import React, { Component } from "react";
 import FilePickComponent from "./FilePickComponent";
 import Papa from "papaparse";
 import ProgressBar from "react-progress-bar-plus";
+import { drawContributions } from "twitter-contributions-canvas";
 import "./App.css";
 import "react-progress-bar-plus/lib/progress-bar.css";
+
+type CanvasData = {
+  years: Array<Year>
+};
+type Contribution = {
+  date: string,
+  count: number,
+  color: string,
+  intensity: number
+};
+type Year = {
+  year: string,
+  total: number,
+  range: {
+    start: string,
+    end: string
+  },
+  contributions: Array<Contribution>
+};
 
 class App extends Component {
   state = {
     error: null,
-    parsingProgress: 0
+    parsingProgress: null,
+    theme: "standard"
   };
+  canvas = React.createRef();
   onAcceptedFiles = (acceptedFiles: Array<File>) => {
     this.setState({
-      parsingProgress: 1
+      parsingProgress: -1
     });
     const rawTweetsFile = acceptedFiles.find(
       file => file.name.indexOf("tweets.csv") > -1
     );
-    console.log(acceptedFiles, rawTweetsFile);
     if (!rawTweetsFile) {
       this.setState({ error: "Can't find tweets.csv" });
     }
@@ -29,7 +50,7 @@ class App extends Component {
       header: true,
       webWorker: true,
       step: (results, parser) => {
-        parsedData = parsedData.concat(results.data);
+        parsedData.push(results.data);
         this.setState({
           parsingProgress: Math.round(
             results.meta.cursor / rawTweetsFile.size * 100
@@ -46,14 +67,23 @@ class App extends Component {
       error: err => this.setState({ error: "Error while parsing csv" })
     });
   };
+
+  drawCanvas() {
+    drawContributions(this.canvas, {
+      data: this.state.data,
+      username: this.state.username,
+      themeName: this.state.theme,
+      footerText: "Made by @sallar & friends - github-contributions.now.sh"
+    });
+  }
   render() {
     console.log(this.state);
     return (
       <div className="container">
-        {this.state.parsingProgress > 0 &&
-          this.state.parsingProgress < 100 && (
-            <ProgressBar percent={this.state.parsingProgress} onTop />
-          )}
+        {this.state.parsingProgress && (
+          <ProgressBar percent={this.state.parsingProgress} onTop />
+        )}
+
         <div className="hero">
           <h1>Twitter Contribution Chart Generator</h1>
           <p>
@@ -78,6 +108,8 @@ class App extends Component {
             We don't upload or store anything, all data is processed in your
             browser page
           </p>
+
+          <canvas ref={this.canvas} />
         </div>
       </div>
     );
