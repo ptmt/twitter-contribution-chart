@@ -1,4 +1,4 @@
-body {
+.wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9,12 +9,29 @@ body {
   border-radius: 10px;
   margin-top: 1em;
   align-items: center;
-  max-width: 800px;
+  max-width: 650px;
+  background: #f4f5f6;
+}
+.hero p {
+  font-size: 0.9em;
+}
+
+.Results {
+  max-width: 650px;
+}
+.Results .smallbtn {
+  font-size: 0.7em;
+  padding: 3px;
+}
+
+.Results canvas {
+  width: 100%;
+  height: auto;
 }
 
 .hero h1 {
   margin-top: 0;
-  margin-bottom: 0.3em;
+  margin-bottom: 1em;
   font-size: 1.8em;
 }
 
@@ -24,6 +41,22 @@ body {
 
 .hero .btn {
   font-size: 1em;
+  min-width: 50%;
+}
+.hero input {
+  background: white;
+  font-size: 1em;
+}
+.hero button {
+  font-size: 1em;
+}
+.hero msg {
+  margin: 1em;
+}
+
+button:disabled {
+  background-color: #cfd0d4;
+  cursor: not-allowed;
 }
 
 footer {
@@ -31,7 +64,7 @@ footer {
 }
 
 a {
-  color: gray;
+  color: #1da1f2;
 }
 
 .error {

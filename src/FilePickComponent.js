@@ -52,13 +52,16 @@ export default class FilePickComponent extends React.Component {
     };
     return (
       <Dropzone
+        disableClick={this.props.disableClick}
+        style={{ position: "relative" }}
         accept={accept}
         onDrop={this.onDrop.bind(this)}
         onDragEnter={this.onDragEnter.bind(this)}
         onDragLeave={this.onDragLeave.bind(this)}
       >
         {dropzoneActive && <div style={overlayStyle}>Drop files...</div>}
-        <div
+        {this.props.children}
+        {/* <div
           style={{
             justifyContent: "center",
             display: "flex",
@@ -67,8 +70,10 @@ export default class FilePickComponent extends React.Component {
             alignItems: "center"
           }}
         >
-          Drag'n'drop tweets.csv
-        </div>
+          {this.state.files.length > 0
+            ? `Found ${this.state.files.map(f => f.name).join(", ")}`
+            : "Drag'n'drop tweets.csv"}
+        </div> */}
       </Dropzone>
     );
   }

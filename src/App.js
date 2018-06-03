@@ -1,119 +1,196 @@
 import React, { Component } from "react";
 import FilePickComponent from "./FilePickComponent";
-import Papa from "papaparse";
 import ProgressBar from "react-progress-bar-plus";
 import { drawContributions } from "twitter-contributions-canvas";
+import { reduceTweets, prepareToCanvasData } from "./processData";
+import { parseData } from "./parseData";
 import "./App.css";
+import "./entireframework.min.css";
 import "react-progress-bar-plus/lib/progress-bar.css";
 
-type CanvasData = {
-  years: Array<Year>
-};
-type Contribution = {
-  date: string,
-  count: number,
-  color: string,
-  intensity: number
-};
-type Year = {
-  year: string,
-  total: number,
-  range: {
-    start: string,
-    end: string
-  },
-  contributions: Array<Contribution>
-};
-
 class App extends Component {
+  availableThemes = {
+    standard: "GitHub",
+    halloween: "Halloween",
+    teal: "Teal",
+    leftPad: "@left_pad",
+    dracula: "Dracula",
+    blue: "Blue",
+    panda: "Panda 🐼",
+    sunny: "Sunny"
+  };
   state = {
     error: null,
-    parsingProgress: null,
-    theme: "standard"
+    parsingProgress: -1,
+    theme: "standard",
+    username: "ptmt",
+    rawTweetsFile: null
   };
+
   canvas = React.createRef();
-  onAcceptedFiles = (acceptedFiles: Array<File>) => {
+  handleUsernameChange = e => {
     this.setState({
-      parsingProgress: -1
+      username: e.target.value
     });
+  };
+  handleSubmit = e => {
+    e.preventDefault();
+    if (!this.state.rawTweetsFile) {
+      this.setState({ error: "Upload file to begin" });
+      return;
+    }
+    this.setState({ progress: 0, error: null, parsedData: null });
+
+    parseData(
+      this.state.rawTweetsFile,
+      parsingProgress => {
+        this.setState({ parsingProgress });
+      },
+      (parsedTweetsNumber, parsedData) => {
+        this.setState(
+          {
+            parsingProgress: -1,
+            parsedData,
+            previewStats: `${parsedTweetsNumber} tweets parsed.`
+          },
+          () => this.drawCanvas()
+        );
+      },
+      err => this.setState({ error: "Error while parsing csv" })
+    );
+  };
+  onAcceptedFiles = (acceptedFiles: Array<File>) => {
     const rawTweetsFile = acceptedFiles.find(
       file => file.name.indexOf("tweets.csv") > -1
     );
     if (!rawTweetsFile) {
       this.setState({ error: "Can't find tweets.csv" });
+    } else {
+      this.setState({ rawTweetsFile });
     }
-    let parsedData = [];
-
-    const s = Papa.parse(rawTweetsFile, {
-      // skipEmptyLines: true,
-      dynamicTyping: true,
-      header: true,
-      webWorker: true,
-      step: (results, parser) => {
-        parsedData.push(results.data);
-        this.setState({
-          parsingProgress: Math.round(
-            results.meta.cursor / rawTweetsFile.size * 100
-          )
-        });
-      },
-      complete: (results, file) => {
-        console.log("Parsing complete:", file, results, parsedData[0]);
-        this.setState({
-          parsingProgress: 100,
-          previewStats: `${parsedData.length} records parsed`
-        });
-      },
-      error: err => this.setState({ error: "Error while parsing csv" })
-    });
   };
 
   drawCanvas() {
-    drawContributions(this.canvas, {
-      data: this.state.data,
-      username: this.state.username,
+    const canvasData: CanvasData = prepareToCanvasData(this.state.parsedData);
+    drawContributions(this.canvas.current, {
+      data: canvasData,
+      username: this.state.username || "ptmt",
       themeName: this.state.theme,
-      footerText: "Made by @sallar & friends - github-contributions.now.sh"
+      footerText: "Made by @sallar for GitHub, converted by @ptmt"
     });
   }
+  downloadCanvas() {
+    try {
+      const dataUrl = this.canvas.current.toDataURL();
+      const a = document.createElement("a");
+      document.body.insertAdjacentElement("beforeend", a);
+      a.download = "contributions.png";
+      a.href = dataUrl;
+      a.click();
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   render() {
-    console.log(this.state);
     return (
-      <div className="container">
-        {this.state.parsingProgress && (
-          <ProgressBar percent={this.state.parsingProgress} onTop />
-        )}
+      <FilePickComponent onFiles={this.onAcceptedFiles} disableClick>
+        <ProgressBar percent={this.state.progress} onTop />
 
-        <div className="hero">
-          <h1>Twitter Contribution Chart Generator</h1>
-          <p>
-            Inspired by&nbsp;
-            <a href="https://github-contributions.now.sh/">
-              https://github-contributions.now.sh
-            </a>
-          </p>
+        <div className="wrapper">
+          <div className="container">
+            <div className="hero">
+              <h1>Twitter Contribution Chart Generator</h1>
 
-          <p>
-            1. Request Twitter Timeline https://twitter.com/settings/account
-            "Request your archive"
-          </p>
-          <p>2. You should receieve .zip file from Twitter</p>
-          <p>3. Download, extract and</p>
-          <FilePickComponent onFiles={this.onAcceptedFiles} />
+              <p>
+                <a href="https://twitter.com/settings/account">
+                  Request Twitter Timeline
+                </a>{" "}
+                your profile, wait for email, and extract tweets.csv from .zip.
+              </p>
 
-          <p>{this.state.previewStats}</p>
+              <div className="msg">
+                <strong>Privacy disclaimer: </strong> This page processes all
+                data locally within your browser, nothing is sent to or stored
+                on the server. You can disable network at all or just{" "}
+                <a href="https://github.com/ptmt/twitter-contribution-chart">
+                  run your own local copy
+                </a>.
+              </div>
 
-          {this.state.error && <div className="error">{this.state.error}</div>}
-          <p>
-            We don't upload or store anything, all data is processed in your
-            browser page
-          </p>
+              <div style={{ margin: "1em 0" }}>
+                <FilePickComponent onFiles={this.onAcceptedFiles}>
+                  {this.state.rawTweetsFile ? (
+                    <p>Found {this.state.rawTweetsFile.name}</p>
+                  ) : (
+                    <button className="btn btn-a">
+                      Upload tweets.csv (or drag'n'drop)
+                    </button>
+                  )}
+                </FilePickComponent>
+              </div>
 
-          <canvas ref={this.canvas} />
+              {this._renderForm()}
+            </div>
+
+            {this.state.error && (
+              <div className="error">{this.state.error}</div>
+            )}
+
+            {this.state.parsedData && (
+              <div className="Results">
+                <h3>Your data is ready! {this.state.previewStats}</h3>
+                <button
+                  className="smallbtn"
+                  onClick={() => this.downloadCanvas()}
+                  type="button"
+                >
+                  Download the Image
+                </button>
+
+                <canvas ref={this.canvas} />
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </FilePickComponent>
     );
   }
+
+  _renderForm = () => {
+    return (
+      <form onSubmit={this.handleSubmit}>
+        {this.state.rawTweetsFile && (
+          <div>
+            <span className="addon">@</span>
+            <input
+              ref={ref => {
+                this.inputRef = ref;
+              }}
+              className="smooth"
+              placeholder="Your GitHub Username"
+              onChange={this.handleUsernameChange}
+              value={this.state.username}
+              id="username"
+            />
+          </div>
+        )}
+        {this.state.username.length > 0 &&
+          this.state.rawTweetsFile && (
+            <button
+              type="submit"
+              className="btn btn-b"
+              disabled={
+                this.state.username.length <= 0 || !this.state.rawTweetsFile
+              }
+            >
+              Generate!
+            </button>
+          )}
+      </form>
+    );
+  };
 }
 
 export default App;
