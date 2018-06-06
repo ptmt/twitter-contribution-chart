@@ -17,11 +17,12 @@ const COLOR_MAP = [
   "#ebedf0"
 ].reverse();
 
-function normalDistributionIntensity(maxInYear: number, count: number): number {
+// TODO: proper normal distribution as github supposedly does
+function calculateIntensity(maxInYear: number, count: number): number {
   if (count === 0) {
     return 0;
   }
-  const quartile = maxInYear / 4;
+  const quartile = maxInYear > 4 ? maxInYear / 4 : 1;
   if (count > 0 && count <= quartile) {
     return 1;
   }
@@ -58,13 +59,6 @@ export function reduceTweets(
   }, data);
 }
 
-function fillEmptyDays(data: ContributionsByYear): ContributionsByYear {
-  const years = Object.keys(data.years);
-  return years.reduce((acc, year) => {
-    return acc;
-  }, data);
-}
-
 export function prepareToCanvasData(data: ContributionsByYear): CanvasData {
   const daysArray = Object.keys(data.days)
     .map(k => data.days[k])
@@ -80,21 +74,23 @@ export function prepareToCanvasData(data: ContributionsByYear): CanvasData {
   }, {});
 
   return {
-    years: Object.keys(data.years).map(k => ({
-      ...data.years[k],
-      range: {
-        start:
-          minDate.getFullYear() === k
-            ? iso(minDate)
-            : iso(new Date(parseInt(k), 0, 1)),
-        end:
-          maxDate.getFullYear() === k
-            ? iso(maxDate)
-            : iso(new Date(parseInt(k), 11, 31))
-      }
-    })),
+    years: Object.keys(data.years)
+      .reverse()
+      .map(k => ({
+        ...data.years[k],
+        range: {
+          start:
+            minDate.getFullYear() === k
+              ? iso(minDate)
+              : iso(new Date(parseInt(k), 0, 1)),
+          end:
+            maxDate.getFullYear() === k
+              ? iso(maxDate)
+              : iso(new Date(parseInt(k), 11, 31))
+        }
+      })),
     contributions: daysArray.map(day => {
-      const intensity = normalDistributionIntensity(
+      const intensity = calculateIntensity(
         maxContributionsByYear[
           new Date(day.timestamp).getFullYear().toString()
         ],

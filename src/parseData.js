@@ -12,7 +12,6 @@ export function parseData(file, onUpdateProgress, onComplete, onError) {
     header: true,
     worker: false,
     step: (results, parser) => {
-      // console.log("pause", results, this.state.parsingProgress);
       // parser.pause();
       parsedTweets += results.data.length;
       parsedData = reduceTweets(parsedData, results.data);
@@ -21,7 +20,6 @@ export function parseData(file, onUpdateProgress, onComplete, onError) {
       );
     },
     complete: (results, file) => {
-      console.log(parsedData);
       onComplete(parsedTweets, parsedData);
     },
     error: onError

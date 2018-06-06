@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import FilePickComponent from "./FilePickComponent";
 import ProgressBar from "react-progress-bar-plus";
 import { drawContributions } from "twitter-contributions-canvas";
-import { reduceTweets, prepareToCanvasData } from "./processData";
+import { prepareToCanvasData } from "./processData";
 import { parseData } from "./parseData";
 import "./App.css";
 import "./entireframework.min.css";
@@ -39,25 +39,29 @@ class App extends Component {
       this.setState({ error: "Upload file to begin" });
       return;
     }
-    this.setState({ progress: 0, error: null, parsedData: null });
-
-    parseData(
-      this.state.rawTweetsFile,
-      parsingProgress => {
-        this.setState({ parsingProgress });
-      },
-      (parsedTweetsNumber, parsedData) => {
-        this.setState(
-          {
-            parsingProgress: -1,
-            parsedData,
-            previewStats: `${parsedTweetsNumber} tweets parsed.`
-          },
-          () => this.drawCanvas()
-        );
-      },
-      err => this.setState({ error: "Error while parsing csv" })
-    );
+    this.setState({ progress: 10, error: null, parsedData: null }, () => {
+      setTimeout(
+        () =>
+          parseData(
+            this.state.rawTweetsFile,
+            parsingProgress => {
+              this.setState({ parsingProgress });
+            },
+            (parsedTweetsNumber, parsedData) => {
+              this.setState(
+                {
+                  parsingProgress: -1,
+                  parsedData,
+                  previewStats: `${parsedTweetsNumber} tweets parsed.`
+                },
+                () => this.drawCanvas()
+              );
+            },
+            err => this.setState({ error: "Error while parsing csv" })
+          ),
+        300
+      );
+    });
   };
   onAcceptedFiles = (acceptedFiles: Array<File>) => {
     const rawTweetsFile = acceptedFiles.find(
@@ -96,9 +100,8 @@ class App extends Component {
   render() {
     return (
       <FilePickComponent onFiles={this.onAcceptedFiles} disableClick>
-        <ProgressBar percent={this.state.progress} onTop />
-
         <div className="wrapper">
+          <ProgressBar percent={this.state.progress} onTop />
           <div className="container">
             <div className="hero">
               <h1>Twitter Contribution Chart Generator</h1>
@@ -121,14 +124,13 @@ class App extends Component {
 
               <div style={{ margin: "1em 0" }}>
                 <FilePickComponent onFiles={this.onAcceptedFiles}>
-                  {this.state.rawTweetsFile ? (
+                  <button className="btn btn-a">
+                    Upload tweets.csv (or drag'n'drop)
+                  </button>
+                  {this.state.rawTweetsFile && (
                     <p>
                       Found {this.state.rawTweetsFile.name}, ready to proceed
                     </p>
-                  ) : (
-                    <button className="btn btn-a">
-                      Upload tweets.csv (or drag'n'drop)
-                    </button>
                   )}
                 </FilePickComponent>
               </div>
@@ -142,7 +144,7 @@ class App extends Component {
 
             {this.state.parsedData && (
               <div className="Results">
-                <h3>Your data is ready! {this.state.previewStats}</h3>
+                <h3>{this.state.previewStats}</h3>
                 <button
                   className="smallbtn"
                   onClick={() => this.downloadCanvas()}
@@ -159,6 +161,10 @@ class App extends Component {
       </FilePickComponent>
     );
   }
+
+  _handleThemeChange = e => {
+    this.setState({ theme: e.target.value });
+  };
 
   _renderForm = () => {
     return (
@@ -178,6 +184,22 @@ class App extends Component {
             />
           </div>
         )}
+        {this.state.username.length > 0 &&
+          this.state.rawTweetsFile && (
+            <label>
+              Theme:
+              <select
+                value={this.state.theme}
+                onChange={this._handleThemeChange}
+              >
+                {Object.keys(this.availableThemes).map(theme => (
+                  <option key={theme} value={theme}>
+                    {this.availableThemes[theme]}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
         {this.state.username.length > 0 &&
           this.state.rawTweetsFile && (
             <button

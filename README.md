@@ -1,9 +1,10 @@
+# Twitter Contribution Chart
+
 Twitter contribution chart displays all your twitter history the same way GitHub does.
 
 Props to @sallar.
 
 Demo output:
-
 
 
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
