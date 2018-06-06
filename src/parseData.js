@@ -1,5 +1,5 @@
 import Papa from "papaparse";
-import { reduceTweets, prepareToCanvasData } from "./processData";
+import { reduceTweets } from "./processData";
 
 export function parseData(file, onUpdateProgress, onComplete, onError) {
   let parsedData: ContributionsByYear = {

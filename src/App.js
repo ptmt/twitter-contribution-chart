@@ -23,7 +23,7 @@ class App extends Component {
     error: null,
     parsingProgress: -1,
     theme: "standard",
-    username: "ptmt",
+    username: "",
     rawTweetsFile: null
   };
 
@@ -74,7 +74,7 @@ class App extends Component {
     const canvasData: CanvasData = prepareToCanvasData(this.state.parsedData);
     drawContributions(this.canvas.current, {
       data: canvasData,
-      username: this.state.username || "ptmt",
+      username: this.state.username,
       themeName: this.state.theme,
       footerText: "Made by @sallar for GitHub, converted by @ptmt"
     });
@@ -122,7 +122,9 @@ class App extends Component {
               <div style={{ margin: "1em 0" }}>
                 <FilePickComponent onFiles={this.onAcceptedFiles}>
                   {this.state.rawTweetsFile ? (
-                    <p>Found {this.state.rawTweetsFile.name}</p>
+                    <p>
+                      Found {this.state.rawTweetsFile.name}, ready to proceed
+                    </p>
                   ) : (
                     <button className="btn btn-a">
                       Upload tweets.csv (or drag'n'drop)

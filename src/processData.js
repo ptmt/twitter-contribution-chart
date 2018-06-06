@@ -4,7 +4,7 @@ import {
   type DayContribution,
   type ContributionsByYear,
   type CanvasData,
-  type TweetRawLing,
+  type TweetRawLines,
   type Year
 } from "./types";
 
@@ -36,7 +36,7 @@ function normalDistributionIntensity(maxInYear: number, count: number): number {
 
 export function reduceTweets(
   data: ContributionsByYear,
-  tweetsToProcess: Array<TweetRawLing>
+  tweetsToProcess: Array<TweetRawLines>
 ): ContributionsByYear {
   const originalTweets = tweetsToProcess.filter(
     f => !f.retweeted_status_id && !f.in_reply_to_status_id && f.timestamp
@@ -45,9 +45,6 @@ export function reduceTweets(
     const date = new Date(tweet.timestamp);
     const year = date.getFullYear().toString();
     const day = iso(date);
-    if (!year) {
-      console.log(tweet.timestamp);
-    }
     return {
       years: {
         ...data.years,
@@ -61,6 +58,13 @@ export function reduceTweets(
   }, data);
 }
 
+function fillEmptyDays(data: ContributionsByYear): ContributionsByYear {
+  const years = Object.keys(data.years);
+  return years.reduce((acc, year) => {
+    return acc;
+  }, data);
+}
+
 export function prepareToCanvasData(data: ContributionsByYear): CanvasData {
   const daysArray = Object.keys(data.days)
     .map(k => data.days[k])
@@ -69,13 +73,12 @@ export function prepareToCanvasData(data: ContributionsByYear): CanvasData {
   const maxDate = new Date(daysArray[daysArray.length - 1].timestamp);
   const maxContributionsByYear = daysArray.reduce((acc, day) => {
     const year = new Date(day.timestamp).getFullYear();
-    // console.log(year, day.count, acc[year]);
     return {
       ...acc,
       [year]: day.count > (acc[year] || 0) ? day.count : acc[year]
     };
   }, {});
-  console.log(maxContributionsByYear);
+
   return {
     years: Object.keys(data.years).map(k => ({
       ...data.years[k],

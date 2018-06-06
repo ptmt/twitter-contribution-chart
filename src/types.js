@@ -28,7 +28,7 @@ export type ContributionsByYear = {
   }
 };
 
-export type TweetRawLing = {
+export type TweetRawLines = {
   expanded_urls: ?string,
   in_reply_to_status_id: ?number,
   retweeted_status_id: ?number,
