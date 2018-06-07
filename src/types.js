@@ -25,7 +25,8 @@ export type ContributionsByYear = {
   },
   days: {
     [string]: DayContribution
-  }
+  },
+  errors: Array<TweetRawLines>
 };
 
 export type TweetRawLines = {

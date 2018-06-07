@@ -1,14 +1,26 @@
+/* @flow */
 import React, { Component } from "react";
 import FilePickComponent from "./FilePickComponent";
 import ProgressBar from "react-progress-bar-plus";
 import { drawContributions } from "twitter-contributions-canvas";
 import { prepareToCanvasData } from "./processData";
 import { parseData } from "./parseData";
+import { type ContributionsByYear, type CanvasData } from "./types";
 import "./App.css";
 import "./entireframework.min.css";
 import "react-progress-bar-plus/lib/progress-bar.css";
 
-class App extends Component {
+type State = {
+  error: ?string,
+  progress: number,
+  theme: string,
+  username: string,
+  rawTweetsFile: ?File,
+  parsedData: ?ContributionsByYear,
+  previewStats: ?string
+};
+
+class App extends Component<{}, State> {
   availableThemes = {
     standard: "GitHub",
     halloween: "Halloween",
@@ -21,10 +33,12 @@ class App extends Component {
   };
   state = {
     error: null,
-    parsingProgress: -1,
+    progress: -1,
     theme: "standard",
     username: "",
-    rawTweetsFile: null
+    rawTweetsFile: null,
+    parsedData: null,
+    previewStats: null
   };
 
   canvas = React.createRef();
@@ -39,20 +53,23 @@ class App extends Component {
       this.setState({ error: "Upload file to begin" });
       return;
     }
-    this.setState({ progress: 10, error: null, parsedData: null }, () => {
+    this.setState({ progress: 1, error: null, parsedData: null }, () => {
       setTimeout(
         () =>
           parseData(
             this.state.rawTweetsFile,
-            parsingProgress => {
-              this.setState({ parsingProgress });
+            (progress, resume) => {
+              this.setState({ progress }, resume);
             },
             (parsedTweetsNumber, parsedData) => {
+              console.log("Malformed tweets", parsedData.errors);
               this.setState(
                 {
-                  parsingProgress: -1,
+                  progress: -1,
                   parsedData,
-                  previewStats: `${parsedTweetsNumber} tweets parsed.`
+                  previewStats: `${parsedTweetsNumber} tweets parsed, ${
+                    parsedData.errors
+                  } malformed`
                 },
                 () => this.drawCanvas()
               );
@@ -75,13 +92,17 @@ class App extends Component {
   };
 
   drawCanvas() {
-    const canvasData: CanvasData = prepareToCanvasData(this.state.parsedData);
-    drawContributions(this.canvas.current, {
-      data: canvasData,
-      username: this.state.username,
-      themeName: this.state.theme,
-      footerText: "Made by @sallar for GitHub, converted by @ptmt"
-    });
+    if (this.state.parsedData) {
+      const canvasData: CanvasData = prepareToCanvasData(this.state.parsedData);
+      drawContributions(this.canvas.current, {
+        data: canvasData,
+        username: this.state.username,
+        themeName: this.state.theme,
+        footerText: "Made by @sallar for GitHub, converted by @ptmt"
+      });
+    } else {
+      this.setState({ error: "Data is not parsed" });
+    }
   }
   downloadCanvas() {
     try {
@@ -96,69 +117,71 @@ class App extends Component {
       console.error(err);
     }
   }
-
   render() {
     return (
-      <FilePickComponent onFiles={this.onAcceptedFiles} disableClick>
-        <div className="wrapper">
-          <ProgressBar percent={this.state.progress} onTop />
-          <div className="container">
-            <div className="hero">
-              <h1>Twitter Contribution Chart Generator</h1>
+      <React.Fragment>
+        <ProgressBar percent={this.state.progress} onTop />,
+        <FilePickComponent onFiles={this.onAcceptedFiles} disableClick>
+          <div className="wrapper">
+            <div className="container">
+              <div className="hero">
+                <h1>Twitter Contribution Chart Generator</h1>
 
-              <p>
-                <a href="https://twitter.com/settings/account">
-                  Request Twitter Timeline
-                </a>{" "}
-                your profile, wait for email, and extract tweets.csv from .zip.
-              </p>
+                <div className="msg">
+                  <strong>Privacy disclaimer: </strong> All data is processed
+                  locally within your browser, nothing is being sending to the
+                  server. Check the source code on{" "}
+                  <a href="https://github.com/ptmt/twitter-contribution-chart">
+                    GitHub
+                  </a>{" "}
+                  or run your own local copy.
+                </div>
 
-              <div className="msg">
-                <strong>Privacy disclaimer: </strong> This page processes all
-                data locally within your browser, nothing is sent to or stored
-                on the server. You can disable network at all or just{" "}
-                <a href="https://github.com/ptmt/twitter-contribution-chart">
-                  run your own local copy
-                </a>.
+                <p>
+                  <a href="https://twitter.com/settings/account">
+                    Request Twitter Timeline
+                  </a>{" "}
+                  your profile, wait for an email from Twitter with .zip file
+                  attached, and extract tweets.csv from it. Dran'd'drop it on
+                  this page.
+                </p>
+
+                <div style={{ margin: "1em 0" }}>
+                  <FilePickComponent onFiles={this.onAcceptedFiles}>
+                    <button className="btn btn-a">Upload tweets.csv</button>
+                    {this.state.rawTweetsFile && (
+                      <p>
+                        Found {this.state.rawTweetsFile.name}, ready to proceed
+                      </p>
+                    )}
+                  </FilePickComponent>
+                </div>
+
+                {this._renderForm()}
               </div>
 
-              <div style={{ margin: "1em 0" }}>
-                <FilePickComponent onFiles={this.onAcceptedFiles}>
-                  <button className="btn btn-a">
-                    Upload tweets.csv (or drag'n'drop)
+              {this.state.error && (
+                <div className="error">{this.state.error}</div>
+              )}
+
+              {this.state.parsedData && (
+                <div className="Results">
+                  <h3>{this.state.previewStats}</h3>
+                  <button
+                    className="smallbtn"
+                    onClick={() => this.downloadCanvas()}
+                    type="button"
+                  >
+                    Download the Image
                   </button>
-                  {this.state.rawTweetsFile && (
-                    <p>
-                      Found {this.state.rawTweetsFile.name}, ready to proceed
-                    </p>
-                  )}
-                </FilePickComponent>
-              </div>
 
-              {this._renderForm()}
+                  <canvas ref={this.canvas} />
+                </div>
+              )}
             </div>
-
-            {this.state.error && (
-              <div className="error">{this.state.error}</div>
-            )}
-
-            {this.state.parsedData && (
-              <div className="Results">
-                <h3>{this.state.previewStats}</h3>
-                <button
-                  className="smallbtn"
-                  onClick={() => this.downloadCanvas()}
-                  type="button"
-                >
-                  Download the Image
-                </button>
-
-                <canvas ref={this.canvas} />
-              </div>
-            )}
           </div>
-        </div>
-      </FilePickComponent>
+        </FilePickComponent>
+      </React.Fragment>
     );
   }
 
@@ -177,7 +200,7 @@ class App extends Component {
                 this.inputRef = ref;
               }}
               className="smooth"
-              placeholder="Your GitHub Username"
+              placeholder="Your Twitter"
               onChange={this.handleUsernameChange}
               value={this.state.username}
               id="username"

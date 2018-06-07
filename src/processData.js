@@ -45,16 +45,27 @@ export function reduceTweets(
   return originalTweets.reduce((acc, tweet) => {
     const date = new Date(tweet.timestamp);
     const year = date.getFullYear().toString();
+    if (
+      !tweet.timestamp ||
+      date.toString() === "Invalid Date" ||
+      year.length > 4
+    ) {
+      return {
+        ...acc,
+        errors: acc.errors.concat(tweet)
+      };
+    }
     const day = iso(date);
     return {
       years: {
-        ...data.years,
-        [year]: incrementYear(year, data.years[year])
+        ...acc.years,
+        [year]: incrementYear(year, acc.years[year])
       },
       days: {
-        ...data.days,
-        [day]: incrementDay(date, data.days[day] ? data.days[day] : null)
-      }
+        ...acc.days,
+        [day]: incrementDay(date, acc.days[day] ? acc.days[day] : null)
+      },
+      errors: acc.errors
     };
   }, data);
 }
@@ -73,9 +84,11 @@ export function prepareToCanvasData(data: ContributionsByYear): CanvasData {
     };
   }, {});
 
+  console.log(Object.keys(data.years));
+
   return {
     years: Object.keys(data.years)
-      .reverse()
+      .sort((a, b) => parseInt(b) - parseInt(a))
       .map(k => ({
         ...data.years[k],
         range: {
@@ -124,5 +137,4 @@ function incrementYear(year: string, previous: ?Year): Year {
 
 function iso(date: Date): string {
   return date.toISOString().split("T")[0];
-  // return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`;
 }

@@ -1,7 +1,18 @@
+/* @flow */
 import React from "react";
 import Dropzone from "react-dropzone";
 
-export default class FilePickComponent extends React.Component {
+type Props = {
+  children: any,
+  disableClick: boolean,
+  onFiles: (Array<File>) => void
+};
+type State = {
+  accept: string,
+  files: Array<File>,
+  dropzoneActive: boolean
+};
+export default class FilePickComponent extends React.Component<Props, State> {
   constructor() {
     super();
     this.state = {
@@ -23,7 +34,7 @@ export default class FilePickComponent extends React.Component {
     });
   }
 
-  onDrop(files) {
+  onDrop(files: Array<File>) {
     this.setState({
       files,
       dropzoneActive: false
@@ -31,14 +42,14 @@ export default class FilePickComponent extends React.Component {
     this.props.onFiles(files);
   }
 
-  applyMimeTypes(event) {
+  applyMimeTypes(event: any) {
     this.setState({
       accept: event.target.value
     });
   }
 
   render() {
-    const { accept, files, dropzoneActive } = this.state;
+    const { accept, dropzoneActive } = this.state;
     const overlayStyle = {
       position: "absolute",
       top: 0,
@@ -61,19 +72,6 @@ export default class FilePickComponent extends React.Component {
       >
         {dropzoneActive && <div style={overlayStyle}>Drop files...</div>}
         {this.props.children}
-        {/* <div
-          style={{
-            justifyContent: "center",
-            display: "flex",
-            flex: 1,
-            height: "100%",
-            alignItems: "center"
-          }}
-        >
-          {this.state.files.length > 0
-            ? `Found ${this.state.files.map(f => f.name).join(", ")}`
-            : "Drag'n'drop tweets.csv"}
-        </div> */}
       </Dropzone>
     );
   }
