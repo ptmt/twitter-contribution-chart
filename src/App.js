@@ -68,7 +68,7 @@ class App extends Component<{}, State> {
                   progress: -1,
                   parsedData,
                   previewStats: `${parsedTweetsNumber} tweets parsed, ${
-                    parsedData.errors
+                    parsedData.errors.length
                   } malformed`
                 },
                 () => this.drawCanvas()
@@ -129,8 +129,9 @@ class App extends Component<{}, State> {
 
                 <div className="msg">
                   <strong>Privacy disclaimer: </strong> All data is processed
-                  locally within your browser, nothing is being sending to the
-                  server. Check the source code on{" "}
+                  locally within your browser, no cookies or 3rd party server,
+                  nothing is stored or sent to the server. Check the source code
+                  on{" "}
                   <a href="https://github.com/ptmt/twitter-contribution-chart">
                     GitHub
                   </a>{" "}
@@ -138,17 +139,17 @@ class App extends Component<{}, State> {
                 </div>
 
                 <p>
+                  Request Twitter Timeline from your profile here{" "}
                   <a href="https://twitter.com/settings/account">
-                    Request Twitter Timeline
-                  </a>{" "}
-                  your profile, wait for an email from Twitter with .zip file
-                  attached, and extract tweets.csv from it. Dran'd'drop it on
+                    https://twitter.com/settings/account
+                  </a>, wait for an email from Twitter with .zip file attached,
+                  and extract tweets.csv from it. Then dran'd'drop tweets.csv to
                   this page.
                 </p>
 
                 <div style={{ margin: "1em 0" }}>
                   <FilePickComponent onFiles={this.onAcceptedFiles}>
-                    <button className="btn btn-a">Upload tweets.csv</button>
+                    <button className="btn btn-a">Open tweets.csv</button>
                     {this.state.rawTweetsFile && (
                       <p>
                         Found {this.state.rawTweetsFile.name}, ready to proceed
@@ -167,13 +168,28 @@ class App extends Component<{}, State> {
               {this.state.parsedData && (
                 <div className="Results">
                   <h3>{this.state.previewStats}</h3>
-                  <button
-                    className="smallbtn"
-                    onClick={() => this.downloadCanvas()}
-                    type="button"
-                  >
-                    Download the Image
-                  </button>
+                  <div className="panel">
+                    <label>
+                      Theme:
+                      <select
+                        value={this.state.theme}
+                        onChange={this._handleThemeChange}
+                      >
+                        {Object.keys(this.availableThemes).map(theme => (
+                          <option key={theme} value={theme}>
+                            {this.availableThemes[theme]}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <button
+                      className="smallbtn"
+                      onClick={() => this.downloadCanvas()}
+                      type="button"
+                    >
+                      Download the Image
+                    </button>
+                  </div>
 
                   <canvas ref={this.canvas} />
                 </div>
@@ -186,7 +202,7 @@ class App extends Component<{}, State> {
   }
 
   _handleThemeChange = e => {
-    this.setState({ theme: e.target.value });
+    this.setState({ theme: e.target.value }, () => this.drawCanvas());
   };
 
   _renderForm = () => {
@@ -207,22 +223,7 @@ class App extends Component<{}, State> {
             />
           </div>
         )}
-        {this.state.username.length > 0 &&
-          this.state.rawTweetsFile && (
-            <label>
-              Theme:
-              <select
-                value={this.state.theme}
-                onChange={this._handleThemeChange}
-              >
-                {Object.keys(this.availableThemes).map(theme => (
-                  <option key={theme} value={theme}>
-                    {this.availableThemes[theme]}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
+
         {this.state.username.length > 0 &&
           this.state.rawTweetsFile && (
             <button

@@ -2,6 +2,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: "IBM Plex Mono";
 }
 
 .hero {
@@ -20,8 +21,17 @@
   max-width: 650px;
 }
 .Results .smallbtn {
-  font-size: 0.7em;
-  padding: 3px;
+  font-size: 0.8em;
+  padding: 6px;
+  font-family: "IBM Plex Mono";
+}
+
+.panel {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  flex-direction: row;
+  justify-content: space-between;
 }
 
 .Results canvas {
@@ -42,10 +52,12 @@
 .hero .btn {
   font-size: 1em;
   min-width: 50%;
+  font-family: "IBM Plex Mono";
 }
 .hero input {
   background: white;
   font-size: 1em;
+  font-family: "IBM Plex Mono";
 }
 .hero button {
   font-size: 1em;

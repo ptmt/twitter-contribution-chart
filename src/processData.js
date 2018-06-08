@@ -84,8 +84,6 @@ export function prepareToCanvasData(data: ContributionsByYear): CanvasData {
     };
   }, {});
 
-  console.log(Object.keys(data.years));
-
   return {
     years: Object.keys(data.years)
       .sort((a, b) => parseInt(b) - parseInt(a))
