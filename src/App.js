@@ -139,12 +139,11 @@ class App extends Component<{}, State> {
                 </div>
 
                 <p>
-                  Request Twitter Timeline from your profile here{" "}
+                  Request Twitter Archive from your profile here{" "}
                   <a href="https://twitter.com/settings/account">
                     https://twitter.com/settings/account
                   </a>, wait for an email from Twitter with .zip file attached,
-                  and extract tweets.csv from it. Then dran'd'drop tweets.csv to
-                  this page.
+                  extract tweets.csv and dran'd'drop it to this page.
                 </p>
 
                 <div style={{ margin: "1em 0" }}>
